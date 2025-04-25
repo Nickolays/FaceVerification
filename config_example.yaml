@@ -1,0 +1,38 @@
+# Dataset configuration
+main_path: "<your path_to_images>"
+train_pair_path: "<your path_to_train.csv>
+test_pair_path: "<your path_to_test.csv>"
+
+# ResNet18, ResNet50, MobileNetV2, EfficientNetB0, EfficientNetB1, EfficientNetB2
+backbone:
+  name: "ResNet18"
+  pretrained: True
+
+transform:
+  resize: 224
+  normalize_mean: [0.5, 0.5, 0.5]
+  normalize_std: [0.5, 0.5, 0.5]
+
+# Training config
+epochs: 5
+batch_size: 256
+num_workers: 4
+lr: 0.001
+threshold: 0.5
+loss_type: arcface
+
+# Inference config
+infer:
+  csv_path: <>
+  image_root: <>
+  model_path: <>
+  num_pairs: 5
+
+# Directly moved model-specific config
+margin: 0.5
+scale: 30
+
+# Fine Tuning config
+finetuning:
+  pretrained_path: "models/face_verification_model.cpkt"
+  freeze_n_layers: 5  # number of layers to freeze in the backbone
