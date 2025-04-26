@@ -1,0 +1,31 @@
+# Folders to ignore
+outputs/
+results/
+__pycache__/
+.idea/
+.vscode/
+logs/
+datasets/
+checkpoints/
+notebooks/
+
+tensorboard_logs/
+runs/
+
+# Ignore files
+*.pyc
+*.pyo
+*.pyd
+*.DS_Store
+*.log
+*.csv
+*.md
+
+# If you want to be strict
+!models/
+!tests/
+!main.py
+!config.yaml
+!requirements-service.txt
+!src/
+!.env

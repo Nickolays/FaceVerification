@@ -56,11 +56,10 @@ python inference.py --img1 tests/Adam_Sandler_0001.jpg --img2 tests/Adam_Sandler
 1.1 Snapshot Ensembling and Gradient Clipping  (Done)
 2. Visualize, compare my photos                (Done)
 2. FineTuning                                  (Done)
-3. Model size reduction                        ()
-4. Docker + FastAPI
+3. Model size reduction                        (Done) ???
+4. Docker + FastAPI                            (Done)
 5. Mini PC 
 6. GPU deploy
-7. Full project (Face Detection + Face Recognition)
 
 
 ### License

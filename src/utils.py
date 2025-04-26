@@ -3,6 +3,8 @@ from torch import nn
 import torchvision.models as models
 from torch.utils.tensorboard import SummaryWriter
 
+from torch.ao.quantization import fuse_modules
+
 
 def get_backbone(name:str, pretrained:bool = False):
     """ Returns a backbone model based on the name provided."""
@@ -128,3 +130,50 @@ def min_max_scaler(x):
         numpy array: The scaled array.
     """
     return (x - x.min()) / (x.max() - x.min())
+
+
+def fuse_resnet(model: nn.Module) -> nn.Module:
+    """
+    Fuses Conv + BN + ReLU layers in ResNet basic and bottleneck blocks.
+    """
+    for module_name, module in model.named_children():
+        if isinstance(module, nn.Sequential):
+            for block in module:
+                if hasattr(block, 'conv1') and hasattr(block, 'bn1') and hasattr(block, 'relu'):
+                    fuse_modules(block, ['conv1', 'bn1', 'relu'], inplace=True)
+                if hasattr(block, 'conv2') and hasattr(block, 'bn2'):
+                    fuse_modules(block, ['conv2', 'bn2'], inplace=True)
+                if hasattr(block, 'downsample') and block.downsample is not None:
+                    fuse_modules(block.downsample, ['0', '1'], inplace=True)
+    return model
+
+
+def fuse_mobilenetv2(model: nn.Module) -> nn.Module:
+    """
+    Fuse Conv + BN + ReLU layers in MobileNetV2 blocks.
+    """
+    for idx, module in enumerate(model.features):
+        if isinstance(module, nn.Sequential):
+            for submodule in module:
+                if isinstance(submodule, nn.Conv2d):
+                    fuse_modules(module, ['0', '1', '2'], inplace=True)
+    return model
+
+
+def fuse_efficientnet(model: nn.Module) -> nn.Module:
+    """
+    Fuse Conv + BN + ReLU/SILU layers in EfficientNet blocks.
+    """
+    for idx, block in enumerate(model.features):
+        if hasattr(block, 'block'):
+            for i, layer in enumerate(block.block):
+                if isinstance(layer, nn.Sequential):
+                    for j in range(len(layer) - 2):
+                        if (isinstance(layer[j], nn.Conv2d) and
+                            isinstance(layer[j+1], nn.BatchNorm2d) and
+                            isinstance(layer[j+2], (nn.ReLU, nn.SiLU))):
+                            try:
+                                fuse_modules(layer, [str(j), str(j+1), str(j+2)], inplace=True)
+                            except:
+                                pass
+    return model

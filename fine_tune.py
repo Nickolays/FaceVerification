@@ -6,7 +6,8 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 from src.model import FaceVerificationModel
 from src.utils import get_backbone, create_writer
-from src.callbacks import SnapshotEnsembling  # if you want snapshot in fine-tune
+# from src.callbacks import SnapshotEnsembling  # if you want snapshot in fine-tune
+from src.transforms import get_default_transform
 
 
 # === Fine-tune Parameters ===
@@ -24,7 +25,7 @@ checkpoint_callback = ModelCheckpoint(
 )
 
 @hydra.main(config_name="config", config_path=".", version_base=None)
-def main(cfg: DictConfig):
+def main(cfg: DictConfig): 
     # Prevent Hydra from changing working directory
     from hydra.core.hydra_config import HydraConfig
     os.chdir(HydraConfig.get().runtime.cwd)
@@ -35,14 +36,7 @@ def main(cfg: DictConfig):
     # cfg.test_pair_path = "/path/to/your/test_pairs.csv"
 
     # === Setup Transform ===
-    transform = transforms.Compose([
-        transforms.Resize((cfg.transform.resize, cfg.transform.resize)),
-        transforms.ToTensor(),
-        transforms.Normalize(
-            mean=cfg.transform.normalize_mean,
-            std=cfg.transform.normalize_std
-        )
-    ])
+    transform = get_default_transform(cfg)
 
     # === Load Backbone and weights ===
     backbone = get_backbone(cfg.backbone.name, pretrained=False)

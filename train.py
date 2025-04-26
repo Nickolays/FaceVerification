@@ -7,6 +7,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from src.callbacks import SnapshotEnsembling    
 from src.model import FaceVerificationModel
 from src.utils import get_backbone, create_writer  # Replace with your model import
+from src.transforms import get_default_transform
 
 
 # Set up checkpoint callback to save best model based on val accuracy
@@ -50,11 +51,7 @@ def main(cfg: DictConfig):
     from hydra.core.hydra_config import HydraConfig
     os.chdir(HydraConfig.get().runtime.cwd)
 
-    transform = transforms.Compose([
-        transforms.Resize((cfg.transform.resize, cfg.transform.resize)),
-        transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))  # 
-    ])
+    transform = get_default_transform(cfg)
 
     # Initialize TensorBoard writer
     writer = create_writer(log_dir="tensorboard_logs", model_name=cfg.backbone.name)
@@ -77,13 +74,13 @@ def main(cfg: DictConfig):
     )
     trainer.fit(model)
 
-    # Optionally save final model manually (after training)
-    save_path = os.path.join("models", "final_model.ckpt")
-    try:
-        torch.save(model.state_dict(), save_path)
-        print(f"Model saved to {save_path}")
-    except Exception as e:
-        print(f"Error saving model: {e}")
+    # # Optionally save final model manually (after training)
+    # save_path = os.path.join("models", "final_model.ckpt")
+    # try:
+    #     torch.save(model.state_dict(), save_path)
+    #     print(f"Model saved to {save_path}")
+    # except Exception as e:
+    #     print(f"Error saving model: {e}")
 
     # The best checkpoint will be saved in trainer.checkpoint_callback.best_model_path
     best_model = FaceVerificationModel.load_from_checkpoint(

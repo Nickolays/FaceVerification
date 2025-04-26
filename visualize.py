@@ -8,6 +8,7 @@ from torchvision import transforms, utils
 import torch.nn.functional as F
 
 from src.utils import get_backbone, min_max_scaler
+from src.transforms import get_default_transform
 
 
 # Load the config.yaml file as a DictConfig object
@@ -24,11 +25,7 @@ def visualize_pairs(cfg: DictConfig):
     assert os.path.exists(cfg.infer.csv_path)
     assert os.path.exists(cfg.infer.model_path)
     # Load model
-    transform = transforms.Compose([
-        transforms.Resize((cfg.transform.resize, cfg.transform.resize)),
-        transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-    ])
+    transform = get_default_transform(cfg)
 
     model = get_backbone(cfg.backbone.name, pretrained=False) # replace with actual backbone
     # model.load_state_dict(torch.load(cfg.infer.model_path, map_location=torch.device('cpu')))

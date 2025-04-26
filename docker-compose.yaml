@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+  face-verification-service:
+    build: .
+    container_name: face_verification
+    ports:
+      - "${PORT:-8000}:8000"
+    # volumes:  # Remove this line if you want to use the local directory
+    #   - .:/app
+    restart: always
+    environment:
+      - PORT-8000
+
+# Dev Mode
+# services:
+#   face_verification_service:
+#     build: .
+#     ports:
+#       - "${PORT:-8000}:${PORT:-8000}"
+#     environment:
+#       - PORT=${PORT:-8000}
+#     volumes:
+#       - .:/app  # Mount local code for auto-reload
+#     command: >
+#       uvicorn main:app 
+#       --host 0.0.0.0 
+#       --port ${PORT:-8000} 
+#       --reload  # --reload → restarts server when code changes (like in dev mode)

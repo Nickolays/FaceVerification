@@ -10,6 +10,7 @@ from omegaconf import OmegaConf
 from torchvision import transforms
 
 from src.utils import get_backbone, simple_face_detection  # Replace with your actual imports
+from src.transforms import get_default_transform
 
 
 def setup_logger():
@@ -43,11 +44,7 @@ def main(config_path, img_path1, img_path2, output_dir):
     logger.info(f"Loaded config from {config_path}")
 
     # Define transform
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Resize((cfg.transform.resize, cfg.transform.resize)),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ])
+    transform = get_default_transform(cfg)
 
     # Load model backbone and weights
     model = get_backbone(cfg.backbone.name, pretrained=False)

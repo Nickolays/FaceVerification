@@ -1,0 +1,9 @@
+fastapi==0.115.12
+uvicorn==0.34.2
+gunicorn
+# torch==2.6.0
+# torchvision==0.21.0
+opencv-python==4.11.0.86
+pydantic==2.11.3
+numpy==2.2.4
+omegaconf==2.3.0

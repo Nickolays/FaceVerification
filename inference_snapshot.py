@@ -8,6 +8,7 @@ from hydra.core.hydra_config import HydraConfig
 
 from src.utils import get_backbone
 from src.helper import evaluate_model, evaluate_snapshot_ensemble, load_snapshot_models
+from src.transforms import get_default_transform
 
 
 @hydra.main(config_name="config", config_path=".", version_base=None)
@@ -33,11 +34,7 @@ def main(cfg: DictConfig):
     os.chdir(HydraConfig.get().runtime.cwd)
 
     # Data transform
-    transform = transforms.Compose([
-        transforms.Resize((cfg.transform.resize, cfg.transform.resize)),
-        transforms.ToTensor(),
-        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-    ])
+    transform = get_default_transform(cfg)
 
     # Dataset and dataloader
     test_dataset = RecognitionDataset(cfg.main_path, cfg.test_pair_path, is_train=False, transformations=transform)
