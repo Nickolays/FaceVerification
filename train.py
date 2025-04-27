@@ -10,6 +10,8 @@ from src.utils import get_backbone, create_writer  # Replace with your model imp
 from src.transforms import get_default_transform
 
 
+torch.manual_seed(0)
+
 # Set up checkpoint callback to save best model based on val accuracy
 checkpoint_callback = ModelCheckpoint(
     monitor="validation_epoch_acc",       # your custom validation metric

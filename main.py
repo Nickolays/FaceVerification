@@ -91,7 +91,8 @@ def perform_healthcheck():
 
 # Load config and model
 cfg = OmegaConf.load("config.yaml")
-device = torch.device("cpu")
+# device = torch.device("cpu")
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Setup transform
 my_transforms = get_default_transform(cfg)

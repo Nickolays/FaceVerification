@@ -1,4 +1,4 @@
-import os, hydra
+import os, hydra, torch
 # from src.model import FaceVerificationModel
 from src.dataset import RecognitionDataset  # Assuming your dataset class is here
 from torch.utils.data import DataLoader
@@ -9,6 +9,8 @@ from hydra.core.hydra_config import HydraConfig
 from src.utils import get_backbone
 from src.helper import evaluate_model, evaluate_snapshot_ensemble, load_snapshot_models
 from src.transforms import get_default_transform
+
+torch.manual_seed(0)
 
 
 @hydra.main(config_name="config", config_path=".", version_base=None)

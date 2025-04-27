@@ -1,0 +1,15 @@
+# RaspberryPI/docker-compose.yml
+version: '3.8'
+
+services:
+  face-verification-rpi:
+    image: face-verification-rpi:latest
+    platform: linux/arm64
+    build:
+      context: ..                   # <— go up one level to project root
+      dockerfile: RaspberryPI/Dockerfile
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - ../.env
+    restart: unless-stopped

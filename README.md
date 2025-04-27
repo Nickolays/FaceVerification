@@ -43,6 +43,7 @@ Face Verification is a project designed to verify the identity of individuals by
 
 ### Usage
 Run the main script to verify faces:
+    - For inference
 ```bash
 python inference.py --image1 path/to/image1.jpg --image2 path/to/image2.jpg
 ```
@@ -51,15 +52,26 @@ For instance
 python inference.py --img1 tests/Adam_Sandler_0001.jpg --img2 tests/Adam_Sandler_0003.jpg --config config.yaml --output_dir results
 ```
 
+    - For deploy
+```
+
+```
+
+    - For Ruspberry Pi
+```git
+git clone ...
+cd <project>
+```
+```bash
+# Build the docker image
+docker-compose -f RaspberryPI/docker-compose.yml up --build
+```
+
+
+
 # TODO:
-1. Tensorboard logging                         (Done)
-1.1 Snapshot Ensembling and Gradient Clipping  (Done)
-2. Visualize, compare my photos                (Done)
-2. FineTuning                                  (Done)
-3. Model size reduction                        (Done) ???
-4. Docker + FastAPI                            (Done)
-5. Mini PC 
-6. GPU deploy
+
+7. Tests                                       ()
 
 
 ### License

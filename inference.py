@@ -12,6 +12,8 @@ from torchvision import transforms
 from src.utils import get_backbone, simple_face_detection  # Replace with your actual imports
 from src.transforms import get_default_transform
 
+torch.manual_seed(0)
+
 
 def setup_logger():
     logger = logging.getLogger("FaceVerification")

@@ -10,6 +10,8 @@ from src.utils import get_backbone, create_writer
 from src.transforms import get_default_transform
 
 
+torch.manual_seed(0)
+
 # === Fine-tune Parameters ===
 PRETRAINED_PATH = "models/face-verification-epoch=14-validation_epoch_acc=0.9957.ckpt"  # path to pretrained model
 FINE_TUNE_DIR = "models/fine_tuned"
