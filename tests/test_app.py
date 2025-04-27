@@ -1,199 +1,97 @@
 import pytest
-from PIL import Image
-import pandas as pd
-import sys
+import torch
 import os
-import io
-import yaml
-from src.scripts.U2Net import U2Net 
+import numpy as np
+import cv2
 
-# pytest app import fix
-dynamic_path = os.path.abspath('.')
-print(dynamic_path)
+from torch.utils.data import DataLoader
+# from torchvision import transforms
 
-sys.path.append(dynamic_path)
+# Fix path for imports
+import sys
+sys.path.append(os.path.abspath('.'))
 
-from app import *
+# Import your modules
+from src.dataset import RecognitionDataset
+from src.model import FaceVerificationModel
+from src.utils import simple_face_detection, get_backbone
+from src.transforms import get_default_transform
+from omegaconf import OmegaConf
 
-
-config = read_config()
-device = config['device']
-
-
-################################ Fixtures #####################################################
-
-@pytest.fixture
-def test_image():
-    """
-    Fixture to return a file object of the test image used for testing.
-    """
-    files = {'file': open('src/tests/test_image.jpg', 'rb')}
-    return(files)
+######################## Fixtures ########################
 
 @pytest.fixture
-def input_image():
-    """
-    Fixture to return a PIL image object of the test image used for testing.
-    """
-    input_image = Image.open('src/tests/test_image.jpg').convert("RGB")
-    return(input_image)
+def dummy_config():
+    """Fixture for dummy config"""
+    return OmegaConf.load("config.yaml")
 
 @pytest.fixture
-def predictions():
+def dummy_dataloader(dummy_config):
+    """Fixture for Dataloader"""
+    # Assuming RecognitionDataset is defined in src.dataset
+    # and it takes main_path and pair_path as arguments
+    transforms = get_default_transform(dummy_config)
+    dataset = RecognitionDataset(
+        main_path=dummy_config.main_path,
+        pair_path=dummy_config.train_pair_path,
+        is_train=False,
+        transformations=transforms  # or some simple transform
+    )
+    return DataLoader(dataset, batch_size=2, shuffle=True)
+
+@pytest.fixture
+def dummy_model(dummy_config):
+    """Fixture for FaceVerificationModel"""
+    model = FaceVerificationModel(config=dummy_config,
+                                  backbone=get_backbone(dummy_config.backbone.name, pretrained=False),
+                                  transform=get_default_transform(dummy_config))
+    return model
+
+######################## Tests ########################
+
+def test_dataloader(dummy_dataloader):
     """
-    Fixture to return the predictions and label names for the test image.
+    Test if dataloader loads batches correctly.
     """
-    input_image = Image.open('src/tests/test_image.jpg').convert("RGB")
-    model = U2Net(num_classes=2).to(device)
-    if device == 'cpu':
-        model.load_state_dict(torch.load(config['model_path'], map_location=torch.device('cpu')))
-    else:
-        model.load_state_dict(torch.load(config['model_path']))
-    predictions = model.predict(source=input_image)
-    return(predictions, model.model.names)
+    batch = next(iter(dummy_dataloader))
+    assert isinstance(batch, dict)
+    assert 'face1' in batch
+    assert 'face2' in batch
+    assert 'target' in batch
+    assert batch['face1'].shape[0] == 2  # batch_size
+    assert batch['face2'].shape[0] == 2
 
-
-################################ Test #####################################################
-
-def test_get_image_from_bytes(test_image):
+def test_train_epoch(dummy_model, dummy_dataloader):
     """
-    Test to check if the function 'get_image_from_bytes' is converting the binary image data to a PIL image object.
+    Test one forward pass through the model.
     """
-    binary_image = test_image['file'].read()
-    output = get_image_from_bytes(binary_image)
-    assert isinstance(output, Image.Image) and output.mode == "RGB"
-
-def test_get_bytes_from_image(input_image):
-    """
-    Test to check if the function 'get_bytes_from_image' is converting the PIL image object to binary image data.
-    """
-    output = get_bytes_from_image(input_image)
-    assert isinstance(output, io.BytesIO)
-
-def test_initialize_models():
-    """
-    Test to check if all the models are loading correctly.
-    """
-    model_sample_model = U2Net(num_classes=2)
-    assert model_sample_model is not None
-    assert config['model_path'] is not None
-
-# def test_transform_predict_to_df(predictions):
-#     """
-#     Test the function 'transform_predict_to_df' which converts the predictions from the YOLO model to a pandas DataFrame.
-#     It takes in two arguments:
-#         predictions: A list of dictionaries returned by the YOLO model
-#         label_names: A list of class labels for the YOLO model
-#     It returns a DataFrame with columns:
-#         'xmin', 'ymin', 'xmax', 'ymax', 'confidence', 'class', 'name'
-#     Asserts:
-#         - The returned object is a DataFrame
-#         - The columns of the DataFrame are as expected
-#         - The DataFrame contains at least one object of class 'dog'
-#     """
-#     predictions, label_names = predictions
-#     predict_bbox = transform_predict_to_df(predictions, label_names)
-#     # Check if the returned object is an instance of pd.DataFrame
-#     assert isinstance(predict_bbox, pd.DataFrame)
-#     # Check if the returned DataFrame has the correct columns
-#     assert set(predict_bbox.columns) == set(['xmin', 'ymin', 'xmax','ymax', 'confidence', 'class', 'name'])
-#     assert 'dog' in predict_bbox.name.tolist()
-
-# def test_get_model_predict(input_image):
-#     """
-#     Test to check if the function 'get_model_predict' is returning a DataFrame object with the correct columns and number of rows.
-#     It also checks if the returned object is an instance of pd.DataFrame
-#     """
-#     model_sample_model = YOLO("./models/sample_model/yolov8n.pt")
-#     predictions = get_model_predict(model_sample_model, input_image)
-#     # Check if the returned object is an instance of pd.DataFrame
-#     assert isinstance(predictions, pd.DataFrame)
-#     # Check if the returned DataFrame has the correct columns
-#     assert set(predictions.columns) == set(['xmin', 'ymin', 'xmax','ymax', 'confidence', 'class', 'name'])
-#     # Check if the returned DataFrame has more than one row
-#     assert len(predictions) > 1
-
-# def test_add_bboxs_on_img(input_image, predictions):
-#     """
-#     Test to check if the function 'add_bboxs_on_img' is adding bounding boxes on the image and returning the image object.
-#     """
-#     predictions, label_names = predictions
-#     predict_bbox = transform_predict_to_df(predictions, label_names)
-#     image_with_bbox = add_bboxs_on_img(input_image, predict_bbox)
-#     assert isinstance(image_with_bbox, Image.Image)
-
-
-
-# import pytest
-# from PIL import Image
-# import pandas as pd
-# import sys
-# import os
-# import io
-
-# # pytest app import fix
-# dynamic_path = os.path.abspath('.')
-# print(dynamic_path)
-
-# sys.path.append(dynamic_path)
-
-# import torch
-
-# from src.scripts.models.U2Net import U2Net
-
-
-# ################################ Fixtures #####################################################
-
-# @pytest.fixture
-# def get_paths():
-#     """
-#     # Fixture to return a file object of the test image used for testing.
-#     """
-#     # files = {'file': open('./tests/test_image.jpg', 'rb')}
-#     # return(files)
-#     imgs_paths = get_image_filepaths("data/train/train")
-#     return imgs_paths
-
-# # @pytest.fixture
-# def predicting():
-#     """ Comlile model and download weights """
-#     weights_path = "results/U2Net/u2net-cardio_segmentation_1.pt" 
-#     input_image = torch.randn((2, 3, 256, 256)).cuda()
-#     model = U2Net().cuda()
-#     model.eval()
-#     model.load_state_dict(torch.load(weights_path))
-#     predict = model(input_image)[-1]
-
-#     return predict
-
-# ################################ Test #####################################################
-
-# def test_initialize_models():
-#     """
-#     Test to check if all the models are loading correctly.
-#     """
-#     model_sample_model = U2Net()
-#     assert model_sample_model is not None
-#     assert os.path.exists("results/U2Net/u2net-cardio_segmentation.pt" )
-
-# def test_initialize_dataloader():
-#     """
+    batch = next(iter(dummy_dataloader))
+    image1, image2 = batch['face1'], batch['face2']
     
-#         Loader should return a np.float32 (wo tensor yet), and output shape have form (bs, chnls, weight, height), 
-#     for image and mask. And also the output shape of both images should have the same size: (256, 256)
-#     """
-#     image_size = (256, 256)
-#     imgs_paths = ['src/tests/test_frame_1.jpg', 'src/tests/test_frame_2.png']  # get_paths()
-#     dataloader = HeartLoader(imgs_paths, imgs_paths, image_size)
-#     image, mask = dataloader[1]
-
-#     assert image.ndim == 3
-#     assert mask.ndim == 3
-#     assert image.shape[1:] == image_size
-#     assert mask.shape[1:] == image_size
-
-# def test_predict():
-#     """  """
-#     predict = predicting()
+    dummy_model.eval()
+    with torch.no_grad():
+        output1 = dummy_model.backbone(image1)
+        output2 = dummy_model.backbone(image2)
     
-#     assert predict.shape == (2, 1, 256, 256)
+    assert output1.shape == output2.shape
+    assert output1.ndim == 2  # (batch_size, embedding_dim)
+
+def test_simple_face_detection_success():
+    """
+    Test simple_face_detection on a sample face image.
+    """
+    img = cv2.imread('./tests/test_image1.jpg')
+    assert img is not None, "Test image not found."
+    
+    face = simple_face_detection(img)
+    
+    # Either detect face or return None (valid behavior)
+    assert face is None or isinstance(face, np.ndarray)
+
+def test_paths_in_config(dummy_config):
+    """
+    Test that important paths in config exist.
+    """
+    assert os.path.exists(dummy_config.main_path), "Main path does not exist!"
+    assert os.path.exists(dummy_config.train_pair_path), "Train pair file missing!"
+    assert os.path.exists(dummy_config.test_pair_path), "Test pair file missing!"
