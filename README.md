@@ -132,7 +132,7 @@ For FastAPI
 pytest tests/test_main.py --maxfail=1 --disable-warnings -v
 ```
 Inside a running container:
-``bash
+```bash
 docker exec -it {CONTAINER_ID} sh
 pytest -v --disable-warnings
 ```
