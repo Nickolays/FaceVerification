@@ -91,26 +91,22 @@ Face Verification compares two facial images to verify identity, using deep-lear
 python train.py
 ```
 2. Inference (CLI)
-    - For inference
 ```bash
 python inference.py --img1 tests/Adam_Sandler_0001.jpg --img2 tests/Adam_Sandler_0003.jpg --config config.yaml --output_dir results
 ```
-
 3. FastAPI Deployment
 - CPU:
-    ```bash
-    docker compose up --build
-    ```
-And open http://localhost:8080/docs
+```bash
+docker compose up --build
+```
 - GPU:
-    ```bash
-    docker compose -f deploy-gpu/docker-compose.yml up --build
-    ```
+```bash
+docker compose -f deploy-gpu/docker-compose.yml up --build
+```
 - For Ruspberry Pi
-    ```bash
-    # Build the docker image
-    docker compose -f RaspberryPI/docker-compose.yml up --build
-    ```
+```bash
+docker compose -f RaspberryPI/docker-compose.yml up --build
+```
 
 ### Code Examples
 ```python
