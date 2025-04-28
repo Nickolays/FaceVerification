@@ -52,6 +52,13 @@ FaceVerification/
 ## Description
 Face Verification compares two facial images to verify identity, using deep-learning embeddings and cosine similarity. It includes training, inference, pruning/quantization, and production deployment (CPU, GPU, Raspberry Pi).
 
+### Example Input Images
+
+<p float="left">
+  <img src="tests/test_image1.jpg" width="300" alt="Test Image 1" />
+  <img src="tests/test_image2.jpg" width="300" alt="Test Image 2" />
+</p>
+
 ### Features
 - Pre-trained models for face embeddings.
 - Customizable training pipelines.
