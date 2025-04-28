@@ -51,20 +51,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# @app.on_event("startup")
-# def save_openapi_json():
-#     '''This function is used to save the OpenAPI documentation 
-#     data of the FastAPI application to a JSON file. 
-#     The purpose of saving the OpenAPI documentation data is to have 
-#     a permanent and offline record of the API specification, 
-#     which can be used for documentation purposes or 
-#     to generate client libraries. It is not necessarily needed, 
-#     but can be helpful in certain scenarios.'''
-#     openapi_data = app.openapi()
-#     # Change "openapi.json" to desired filename
-#     with open("openapi.json", "w") as file:
-#         json.dump(openapi_data, file)
-
 # redirect
 # @app.get("/", include_in_schema=False)
 # async def redirect():
