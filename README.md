@@ -53,25 +53,30 @@ python inference.py --img1 tests/Adam_Sandler_0001.jpg --img2 tests/Adam_Sandler
 ```
 
     - For deploy
+```bash
+docker compose up --build
 ```
-
+    - For GPU deploy
+```bash
+docker compose -f deploy-gpu/docker-compose.yml up --build
 ```
-
     - For Ruspberry Pi
-```git
-git clone ...
-cd <project>
-```
 ```bash
 # Build the docker image
-docker-compose -f RaspberryPI/docker-compose.yml up --build
+docker compose -f RaspberryPI/docker-compose.yml up --build
 ```
 
 
+### Tests
+For application
+```bash
+pytest tests/test_app.py --maxfail=1 --disable-warnings -v
+```
+For FastAPI
+```bash
+pytest tests/test_main.py --maxfail=1 --disable-warnings -v
+```
 
-# TODO:
-
-7. Tests                                       ()
 
 
 ### License
